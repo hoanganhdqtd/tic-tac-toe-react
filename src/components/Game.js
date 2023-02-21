@@ -1,15 +1,27 @@
 import React, { useState, useEffect } from "react";
 import Board from "./Board";
+import History from "./History";
 
 function Game() {
   const [squares, setSquares] = useState(Array(9).fill(null));
   const [xIsNext, setXIsNext] = useState(true);
   const [winner, setWinner] = useState(null);
+  const [history, setHistory] = useState([
+    {
+      squares: Array(9).fill(null),
+    },
+  ]);
+  const [stepNumber, setStepNumber] = useState(0);
 
   //Declaring a Winner
   useEffect(() => {
-    "Your code here";
-  }, [squares]);
+    // "Your code here";
+    // const newWinner = calculateWinner(squares);
+    const newWinner = calculateWinner(history[history.length - 1].squares);
+    if (newWinner) {
+      setWinner(newWinner);
+    }
+  }, [history]);
 
   //function to check if a player has won.
   //If a player has won, we can display text such as “Winner: X” or “Winner: O”.
@@ -40,12 +52,45 @@ function Game() {
 
   //Handle player
   const handleClick = (i) => {
-    "Your code here";
+    // "Your code here";
+    const currentHistory = history.slice(0, stepNumber + 1);
+    const current = currentHistory[currentHistory.length - 1];
+    const squares = current.squares.slice();
+
+    if (squares[i] || calculateWinner(squares)) {
+      return;
+    }
+    squares[i] = xIsNext ? "X" : "O";
+    setXIsNext((prevState) => !prevState);
+    setStepNumber(currentHistory.length);
+
+    setHistory(
+      currentHistory.concat([
+        {
+          squares: squares,
+        },
+      ])
+    );
   };
 
   //Restart game
-  const handlRestart = () => {
-    "Your code here";
+  const handleRestart = () => {
+    // "Your code here";
+    // setSquares(Array(9).fill(null));
+    setHistory([
+      {
+        squares: Array(9).fill(null),
+      },
+    ]);
+    setWinner(null);
+    setXIsNext(true);
+    setStepNumber(0);
+  };
+
+  // Undo
+  const jumpTo = (step) => {
+    setStepNumber(step);
+    setXIsNext(step % 2 === 0);
   };
 
   return (
@@ -53,9 +98,13 @@ function Game() {
       <h2 className="result">Winner is: {winner ? winner : "N/N"}</h2>
       <div className="game">
         <span className="player">Next player is: {xIsNext ? "X" : "O"}</span>
-        <Board squares={"Your code here"} handleClick={"Your code here"} />
+        <Board
+          squares={history[stepNumber].squares}
+          handleClick={handleClick}
+        />
+        <History history={history} jumpTo={jumpTo} />
       </div>
-      <button onClick={"Your code here"} className="restart-btn">
+      <button onClick={handleRestart} className="restart-btn">
         Restart
       </button>
     </div>
